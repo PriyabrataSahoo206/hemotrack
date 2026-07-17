@@ -1,0 +1,142 @@
+{
+  "entities": {
+    "DriveFile": {
+      "title": "DriveFile",
+      "description": "Represents a physical file synced or uploaded in the HemoTrack Secure Drive Vault.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the drive file"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the file"
+        },
+        "mimeType": {
+          "type": "string",
+          "description": "Mime type format of the file"
+        },
+        "size": {
+          "type": "integer",
+          "description": "Integer size of the file in bytes"
+        },
+        "createdTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp representing creation time"
+        },
+        "webViewLink": {
+          "type": "string",
+          "description": "External view URL to the Google Drive asset"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["real", "sandbox"],
+          "description": "Specifies whether this is a simulated sandbox element or real file"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The Firebase User UID who owns this file"
+        }
+      },
+      "required": ["id", "name", "mimeType", "size", "createdTime", "source", "userId"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "HIPAA compliance audit trace for security events and logs.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the audit event"
+        },
+        "event": {
+          "type": "string",
+          "description": "Description of the event"
+        },
+        "action": {
+          "type": "string",
+          "description": "Standardized action key (e.g. CREATE, DELETE, SYNC)"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the security log entry"
+        },
+        "userId": {
+          "type": "string",
+          "description": "UID of the actor who performed the action"
+        },
+        "details": {
+          "type": "string",
+          "description": "Optional verbose metadata for security audit trace"
+        }
+      },
+      "required": ["id", "event", "action", "timestamp", "userId"]
+    },
+    "Volunteer": {
+      "title": "Volunteer",
+      "description": "A registered volunteer for blood logistics, donation, or support coordination.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the volunteer"
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Full name of the volunteer"
+        },
+        "email": {
+          "type": "string",
+          "description": "Contact email address"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact phone number"
+        },
+        "bloodGroup": {
+          "type": "string",
+          "description": "Blood group type (e.g. A+, O-)"
+        },
+        "city": {
+          "type": "string",
+          "description": "City of residence"
+        },
+        "availability": {
+          "type": "string",
+          "description": "Availability timeframe (e.g. weekdays, weekends)"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current registration status"
+        },
+        "registeredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp representing volunteer registration time"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The Firebase User UID who created this volunteer registration, if authenticated"
+        }
+      },
+      "required": ["id", "fullName", "email", "phone", "bloodGroup", "city", "availability", "status", "registeredAt"]
+    }
+  },
+  "firestore": {
+    "/driveFiles/{fileId}": {
+      "schema": "DriveFile",
+      "description": "Collection of documents representing all blood vault and cold chain files."
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Compliance security log trail for verification."
+    },
+    "/volunteers/{volunteerId}": {
+      "schema": "Volunteer",
+      "description": "Collection of documents representing all blood logistics volunteers."
+    }
+  }
+}

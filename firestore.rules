@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitive Definition
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { 
+      return request.resource.data; 
+    }
+    function existing() { 
+      return resource.data; 
+    }
+    function isSignedIn() { 
+      return request.auth != null; 
+    }
+    function isVerifiedUser() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'anonymous');
+    }
+
+    // Entity validator for DriveFile
+    function isValidDriveFile(data) {
+      return data.keys().hasAll(['id', 'name', 'mimeType', 'size', 'createdTime', 'source', 'userId'])
+        && data.keys().size() == 7
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 256
+        && data.mimeType is string && data.mimeType.size() <= 128
+        && data.size is int
+        && data.createdTime is string && data.createdTime.size() <= 64
+        && (data.source == 'real' || data.source == 'sandbox')
+        && data.userId == request.auth.uid;
+    }
+
+    // Entity validator for AuditLog
+    function isValidAuditLog(data) {
+      return data.keys().hasAll(['id', 'event', 'action', 'timestamp', 'userId', 'details'])
+        && data.keys().size() == 6
+        && data.id is string && data.id.size() <= 128
+        && data.event is string && data.event.size() <= 512
+        && data.action is string && data.action.size() <= 64
+        && data.timestamp is string && data.timestamp.size() <= 64
+        && data.userId == request.auth.uid
+        && data.details is string && data.details.size() <= 2048;
+    }
+
+    // Entity validator for Volunteer
+    function isValidVolunteer(data) {
+      return data.keys().hasAll(['id', 'fullName', 'email', 'phone', 'bloodGroup', 'city', 'availability', 'role', 'status', 'registeredAt', 'idNumber', 'photoUrl'])
+        && data.id is string && data.id.size() <= 128
+        && data.fullName is string && data.fullName.size() <= 128
+        && data.email is string && data.email.size() <= 128
+        && data.phone is string && data.phone.size() <= 32
+        && data.bloodGroup is string && data.bloodGroup.size() <= 10
+        && data.city is string && data.city.size() <= 128
+        && data.availability is string && data.availability.size() <= 64
+        && data.role is string && data.role.size() <= 128
+        && data.status is string && data.status.size() <= 32
+        && data.registeredAt is string && data.registeredAt.size() <= 64
+        && data.idNumber is string && data.idNumber.size() <= 64
+        && data.photoUrl is string && data.photoUrl.size() <= 200000
+        && (!data.keys().hasAll(['userId']) || (data.userId is string && data.userId.size() <= 128));
+    }
+
+    // Rules for /driveFiles/{fileId}
+    match /driveFiles/{fileId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isVerifiedUser() 
+        && isValidId(fileId) 
+        && fileId == incoming().id
+        && isValidDriveFile(incoming());
+      allow update: if isVerifiedUser()
+        && isValidId(fileId)
+        && fileId == incoming().id
+        && isValidDriveFile(incoming())
+        && incoming().userId == existing().userId
+        && incoming().id == existing().id
+        && incoming().createdTime == existing().createdTime;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+
+    // Rules for /auditLogs/{logId}
+    match /auditLogs/{logId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isVerifiedUser()
+        && isValidId(logId)
+        && logId == incoming().id
+        && isValidAuditLog(incoming());
+      allow update: if false; // Audit logs are immutable
+      allow delete: if false; // Audit logs can never be deleted
+    }
+
+    // Rules for /volunteers/{volunteerId}
+    match /volunteers/{volunteerId} {
+      allow get, list: if true; // Let users register and find their registration details easily
+      allow create: if isValidId(volunteerId)
+        && volunteerId == incoming().id
+        && isValidVolunteer(incoming());
+      allow update: if isValidId(volunteerId)
+        && volunteerId == incoming().id
+        && isValidVolunteer(incoming());
+      allow delete: if true; // Allow delete so user can clear the registry easily
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "HemoTrack",
+  "description": "Compliance-first blood logistics and coordination platform for hospitals, authorized blood banks, and delivery partners.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
