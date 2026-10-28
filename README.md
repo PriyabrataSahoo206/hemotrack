@@ -1,11 +1,6 @@
 
 <div align="center">
   <img src="src/HemoTrack_logo_transparent.png" alt="HemoTrack — Moving Lifelines. Saving Lives." width="220" />
-
-  <h1>HemoTrack</h1>
-
-  <p><strong>Moving Lifelines. Saving Lives.</strong></p>
-
   <p>
     <a href="https://hemotrackmedico.netlify.app/">
       Official Website
