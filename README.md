@@ -1,6 +1,6 @@
 
 <div align="center">
-  <img src="assets/hemotrack-logo.png" alt="HemoTrack — Moving Lifelines. Saving Lives." width="220" />
+  <img src="src/HemoTrack_logo_transparent.png" alt="HemoTrack — Moving Lifelines. Saving Lives." width="220" />
 
   <h1>HemoTrack</h1>
 
